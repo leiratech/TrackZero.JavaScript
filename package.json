@@ -1,0 +1,21 @@
+{
+  "name": "@leiratech/trackzero-js",
+  "version": "1.0.0",
+  "description": "TrackZero is a full analytics platform that allows you to track what is happening in your system in real time.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-tz:leiratech/TrackZero.JavaScript.git"
+  },
+  "keywords": [
+    "analytics"
+  ],
+  "author": "Tariq Shahrouri",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
