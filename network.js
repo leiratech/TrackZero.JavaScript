@@ -27,7 +27,7 @@ const api = {
 
       return new Response(response.status, data);
     } catch (err) {
-      return new Response(null, null, null, err);
+      return new Response(null, null, err);
     }
   },
 };

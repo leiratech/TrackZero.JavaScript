@@ -14,7 +14,7 @@ For more details, please visit [https://TrackZero.io](https://trackzero.io)
 # Installation
 
 ```bat
-npm install trackzero-js
+npm install @leiratech/trackzero-js
 ```
 
 # Setup
