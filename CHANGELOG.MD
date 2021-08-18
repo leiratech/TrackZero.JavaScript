@@ -11,7 +11,7 @@
 #### Added
 
 - [CHANGELOG.md](#change-log)
-- Added getInstance static method to TrackZeroClient
+- Added `getInstance` static method to TrackZeroClient
 
 #### Modifications
 
