@@ -1,90 +1,212 @@
-# TrackZero-JS
+[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) [![#](https://img.shields.io/nuget/v/Leira.TrackZero.NetCore.svg)](https://www.nuget.org/packages/Leira.TrackZero.NetCore)
 
+![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
+
+<h1 align="center">
+  <img alt="logo" src="./logo.svg" width="100"/>
+  <br/>
+  TrackZero-JS
+</h1>
 Powerful, insightful and real-time analytics that helps you take your products and apps to the next level.
 
 For more details, please visit [https://TrackZero.io](https://trackzero.io)
 
-## Installation
+# Installation
 
 ```bat
 npm install trackzero-js
 ```
 
-## Setup
+# Setup
 
-### In Your Project
+### Import
 
-At the initialization of your project create a new singleton instance of the TrackZeroClient and pass in your API Key
+> Note: You can use either use `import` or `require`, both work fine
 
 ```js
 import { TrackZeroClient } from "@leiratech/trackzero-js";
+```
+
+### Initialization
+
+Initialize the TrackZeroClient instance by passing in your API key before using any of the methods.
+
+```js
 let instance = new TrackZeroClient("API-KEY");
 ```
 
-#### Or
+# Getting Started
+
+### TrackZero Instance
+
+After initializing the TrackZero instance, you could get the instance anywhere in your project
 
 ```js
-const { TrackZeroClient } = require("@leiratech/trackzero-js");
-let instance = new TrackZeroClient("API-KEY");
+let instance = TrackZeroClient.getInstance();
 ```
 
-## Usage
+## Entity
 
-### The screen you want to track
+Entities are objects that contain data. It can represent any object in the real world. Each entity is defined by it’s Type and Id.
 
 ```js
-import { Entity, Event } from "@leiratech/trackzero-js";
+import { Entity } from "@leiratech/trackzero-js";
 ```
 
-#### Or
+#### Create an Entity object
 
 ```js
-const { Entity, Event } = require("@leiratech/trackzero-js");
+/**
+ * @constructor
+ * Initializes the Entity object
+ * @param {string} type - states what the entity identifies as
+ * @param {(string|number)} id - unique id associated with the entity
+ */
+let entity = new Entity("type", "id");
 ```
 
-### Sending Entities
+#### Add Attributes
 
 ```js
-/* Prepare your entity (User object), if we already have an entity of
-Type "User" and Id 1, this will update the information stored in
-TrackZero with the ones we set here.*/
+/**
+ * Adds custom attributes to the entity
+ * @param {string} attribute - property name
+ * @param {*} value - property value
+ * @returns the entity instance
+ */
+entity.addAttribute("attribute", "value");
+```
 
-let user = Entity("User", 1)
-  /* Adding attributes (Properties) to send to TrackZero and make it
-reportable.*/
-  .addAttribute("Name", "Jane Doe")
-  .addAttribute("Date Of Birth", new Date().toISOString())
-  // Adding Reference Attributes that will link to other entities.
-  /* Since the Entity of Type "Country" and Id "US" doesn't exist in our
-project, it will be created automatically. We will add more attributes
-to it later.*/
+#### Add Attributes Referencing Other Entities
+
+```js
+/**
+ * Adds custom attributes to the entity that are related to another entity
+ * @param {string} attribute - property name
+ * @param {string} referenceType - the entity type it is referencing
+ * @param {(string|number)} referenceId - the entity id it is referencing
+ * @returns the entity instance
+ */
+entity.addEntityReferencedAttribute(
+  "attribute",
+  "referenceType",
+  "referenceId"
+);
+```
+
+#### Track Entity
+
+```js
+/**
+ * Creates/Updates the Entity
+ * @async
+ * @param {Entity} entity
+ * @returns the response status
+ */
+await instance.upsertEntity(entity);
+```
+
+> **Note:** Upsert _(Update/Insert)_ is applied when sending the entity. So, if the the entity of type X with id Y already exists, then it gets updated, else a new entity is created. This also applies to the entity's referenced attributes in `addEntityReferencedAttribute`.
+
+#### Complete Entity Example
+
+```js
+let user = new Entity("User", "USER_ID")
+  .addAttribute("Name", "Sam Smith")
+  .addAttribute("Date Of Birth", new Date(Date.UTC(1990, 11, 23))) //Make sure dates are in UTC
   .addEntityReferencedAttribute("Location", "Country", "US");
 
-// Send the Entity to TrackZero
 await instance.upsertEntity(user);
 ```
 
-### Sending Events
+## Event
+
+Events are considered as actions that are emitted from an entity and impact another entity
 
 ```js
-/* Prepare the event. Every event has a minimum requirement of Name
-(Event Name), and Emitter info (The entitiy that triggered the
-event).*/
-let event = new Event("User", 1, "Subscribed")
-  /* Just like entities, You can add attributes (Properties) to send to
-TrackZero and make it reportable.*/
-  .addAttribute("Paid Amount", 9.99)
-  /* Since the Entity of Type "Marketing Campaign" and Id "Appstore
-Direct Marketing" doesn't exist in our project, it will be created
-automatically. We will add more attributes to it later.*/
-  .addEntityReferencedAttribute(
-    "User Source",
-    "Marketing Campaign",
-    "Appstore Direct Marketing"
-  )
-  /* Entities that were impacted by this event*/
-  .addImpactedTarget("Marketing Campaign", "Appstore Direct Marketing");
+import { Event } from "@leiratech/trackzero-js";
+```
 
-// Send the Event to TrackZero
+#### Create an Event object
+
+```js
+/**
+ * @constructor
+ * Initializes the Event object
+ * @param {string} emitterType - the entity type that emitted the event
+ * @param {(string|number)} emitterId - the entity id that emitted the event
+ * @param {string} name - the event name
+ */
+let event = new Event("emitterType", "emitterId", "name");
+```
+
+#### Add Attributes
+
+```js
+/**
+ * Adds custom attributes to the event
+ * @param {string} attribute - property name
+ * @param {*} value - property value
+ * @returns the event instance
+ */
+event.addAttribute("attribute", "value");
+```
+
+#### Add Attributes Referencing Other Entities
+
+```js
+/**
+ * Adds custom attributes to the event that are related to another entity
+ * @param {string} attribute - property name
+ * @param {string} referenceType - the entity type it is referencing
+ * @param {(string|number)} referenceId - the entity id it is referencing
+ * @returns the event instance
+ */
+event.addEntityReferencedAttribute("attribute", "referenceType", "referenceId");
+```
+
+#### Add Impacted Entities
+
+```js
+/**
+ * Adds entities that were impacted by this event
+ * @param {string} impactedType - the entity type that was impacted by the event
+ * @param {(string|number)} impactedId - the entity id that was impacted by the event
+ * @returns the event instance
+ */
+event.addImpactedTarget("impactedType", "impactedId");
+```
+
+#### Track Event
+
+```js
+/**
+ * Creates/Updates the Event
+ * @async
+ * @param {Event} event
+ * @returns the response status
+ */
 await instance.upsertEvent(event);
 ```
+
+> **Note:** Like the Entity object, upsert _(Update/Insert)_ is applied to the event's emitter, entity's referenced attributes in `addEntityReferencedAttribute`, and the impacted entities in `addImpactedTarget`.
+
+#### Complete Event Example
+
+```js
+let checked = new Event("User", "USER_ID", "Checked Out")
+  .addAttribute("Cart Total", 99.95)
+  .addEntityReferencedAttribute("Item", "Product", "SKU-1234")
+  .addImpactedTarget("Warehouse", "WH-BLVD-652");
+
+// Send the Event to TrackZero
+await instance.upsertEvent(checked);
+```
+
+# Resources
+
+[Changelog](./CHANGELOG.md#change-log)
+
+# License
+
+[MIT](https://github.com/leiratech/TrackZero.JavaScript/blob/main/LICENSE)
