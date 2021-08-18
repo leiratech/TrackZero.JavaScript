@@ -1,28 +1,39 @@
+"use strict";
 const { api } = require("./network");
 /**
  * @class
  */
 class TrackZeroClient {
-  #apiKey;
-
   /**
    * @constructor
    * Initializes the singleton instance with the supplied API key
    * @param {string} apiKey
-   * @returns an sinngleton instance of TrackZeroClient
+   * @returns a singleton instance of TrackZeroClient
    */
   constructor(apiKey) {
     if (TrackZeroClient.instance instanceof TrackZeroClient) {
       return TrackZeroClient.instance;
     }
 
-    if (!apiKey) throw "API Key Required";
+    if (!apiKey) throw "Error [TrackZeroClient][Constructor]: API Key Required";
 
-    this.#apiKey = apiKey;
+    this.apiKey = encodeURI(apiKey);
     Object.freeze(this.apiKey);
     Object.freeze(this);
 
     TrackZeroClient.instance = this;
+  }
+
+  /**
+   *
+   * @static
+   * @returns the instance of TrackZeroClient
+   */
+  static getInstance() {
+    if (TrackZeroClient.instance instanceof TrackZeroClient) {
+      return TrackZeroClient.instance;
+    }
+    throw "Error [TrackZeroClient][getInstance]: TrackZeroClient was not instantiated";
   }
 
   /**
@@ -32,15 +43,18 @@ class TrackZeroClient {
    * @param {Entity} entity
    * @returns the response status
    */
-  upsertEntity = async (entity) => {
+  async upsertEntity(entity) {
+    if (!(entity instanceof Entity)) {
+      throw "Error [TrackZeroClient][upsertEntity]: parameter should be of type Entity";
+    }
     let body = {
       type: entity.type,
       id: entity.id,
       customAttributes: entity.customAttributes,
     };
 
-    return await api.post(`/entities?X-API-KEY=${this.#apiKey}`, body);
-  };
+    return await api.post(`/entities?X-API-KEY=${this.apiKey}`, body);
+  }
 
   /**
    *
@@ -49,7 +63,10 @@ class TrackZeroClient {
    * @param {Event} event
    * @returns the response status
    */
-  upsertEvent = async (event) => {
+  async upsertEvent(event) {
+    if (!(event instanceof Event)) {
+      throw "Error [TrackZeroClient][upsertEvent]: parameter should be of type Event";
+    }
     let body = {
       emitter: {
         type: event.emitterType,
@@ -60,8 +77,8 @@ class TrackZeroClient {
       Targets: event.targets,
     };
 
-    return await api.post(`/events?X-API-KEY=${this.#apiKey}`, body);
-  };
+    return await api.post(`/events?X-API-KEY=${this.apiKey}`, body);
+  }
 }
 
 /**
@@ -71,35 +88,26 @@ class Entity {
   /**
    * @constructor
    * Initializes the Entity object
-   * @param {string} type - Entity's name
+   * @param {string} type - Entity's type
    * @param {(string|number)} id - Entity's id
-   * @param {Object} [customAttributes = {}] - Object containing an entity's custom attributes
-   *
-   * @example <caption>Simple Entity Constructor</caption>
-   * let entity = new Entity("Name", 1)
-   * //To add an attribute to the entity (Method Chainable)
-   * .addAttribute("attr1", "value")
-   * //To add an attribute that references another entity (Method Chainable)
-   * .addEntityReferencedAttribute("relationAttr", "entityName", "entityId")
    *
    * @example
-   *<caption>Complex Entity Constructor</caption>
    *
    * ```js
-   * let entity = new Entity("Name", 1, {
-   *    "attr1" : 123,
-   *    "attr2" : "value",
-   *    "relationAttr" : {
-   *        "type" : "entityName",
-   *        "id" : "entityId"
-   *    }
-   * })
+   * let entity = new Entity("User", "87717c11-ed5a...")
+   *  //Adds an attribute to the entity (Method Chainable)
+   *  .addAttribute("Name", "Sam Smith")
+   *  //Adds an attribute that references another entity (Method Chainable)
+   *  .addEntityReferencedAttribute("Nationality", "Country", "US")
    * ```
    */
-  constructor(type, id, customAttributes = {}) {
+  constructor(type, id) {
+    if (!type || !id) {
+      throw "Error [Entity][Constructor]: 'type' and 'id' are required";
+    }
     this.type = type;
     this.id = id;
-    this.customAttributes = customAttributes;
+    this.customAttributes = {};
   }
 
   /**
@@ -109,23 +117,29 @@ class Entity {
    * @param {*} value - Entity's attribute value
    * @returns the entity instance
    */
-  addAttribute = (attribute, value) => {
+  addAttribute(attribute, value) {
+    if (!attribute || !value) {
+      throw "Error [Entity][AddAttribute]: 'name' and 'value' are required";
+    }
     this.customAttributes[attribute] = value;
     return this;
-  };
+  }
 
   /**
    *
    * Adds custom attributes to the entity that are related to another entity
    * @param {string} attribute - Entity's attribute name
-   * @param {string} referenceType - Related to entity name
+   * @param {string} referenceType - Related to entity type
    * @param {(string|number)} referenceId - Related to entity id
    * @returns the entity instance
    */
-  addEntityReferencedAttribute = (attribute, referenceType, referenceId) => {
+  addEntityReferencedAttribute(attribute, referenceType, referenceId) {
+    if (!attribute || !referenceType || !referenceId) {
+      throw "Error [Entity][AddEntityReferencedAttribute]: 'name', 'reference type' and 'reference id' are required";
+    }
     this.customAttributes[attribute] = { type: referenceType, id: referenceId };
     return this;
-  };
+  }
 }
 
 /**
@@ -138,48 +152,28 @@ class Event {
    * @param {string} emitterType - Type of the entity that emitted the event
    * @param {(string|number)} emitterId - Id of the entity that emitted the event
    * @param {string} name - Event's name
-   * @param {Object[]} [targets = []] - Array of entities that were impacted by this event
-   * @param {Object} [customAttributes = {}] - Object containing an entity's custom attributes
    *
-   * @example <caption>Simple Event Constructor</caption>
-   * let event = new Event("emitterEntityName", 1,"eventName")
-   * //To add an attribute to the event (Method Chainable)
-   * .addAttribute("attr1", "value")
-   * //To add an attribute that references another entity (Method Chainable)
-   * .addEntityReferencedAttribute("relationAttr", "entityName", "entityId")
-   * //To add an entity that was impacted by the event (Method Chainable)
-   * .addImpactedTarget("entityName", "entityId")
    * @example
-   *<caption>Complex Event Constructor</caption>
    *
    * ```js
-   * let event = new Event("emitterEntityName", 1, "eventName",[
-   *  {
-   *    "type" : "Impacted Entity Name",
-   *    "id" : "Impacted Entity Id"
-   *  }
-   * ], {
-   *    "attr1" : 123,
-   *    "attr2" : "value",
-   *    "relationAttr" : {
-   *        "type" : "entityName",
-   *        "id" : "entityId"
-   *    }
-   * })
+   * let event = new Event("User", "87717c11-ed5a...", "Checked Out")
+   *  //To add an attribute to the event (Method Chainable)
+   *  .addAttribute("Cart Total", 799.99)
+   *  //To add an attribute that references another entity (Method Chainable)
+   *  .addEntityReferencedAttribute("Item", "Product", "SKU-1234")
+   *  //To add an entity that was impacted by the event (Method Chainable)
+   *  .addImpactedTarget("Company", "Store A")
    * ```
    */
-  constructor(
-    emitterType,
-    emitterId,
-    name,
-    targets = [],
-    customAttributes = {}
-  ) {
+  constructor(emitterType, emitterId, name) {
+    if (!emitterType || !emitterId || !name) {
+      throw "Error [Event][Constructor]: 'emitter type', 'emitter id' and 'name' are required";
+    }
     this.name = name;
     this.emitterType = emitterType;
     this.emitterId = emitterId;
-    this.targets = targets;
-    this.customAttributes = customAttributes;
+    this.targets = [];
+    this.customAttributes = {};
   }
 
   /**
@@ -189,23 +183,29 @@ class Event {
    * @param {*} value - Event's attribute value
    * @returns the event instance
    */
-  addAttribute = (attribute, value) => {
+  addAttribute(attribute, value) {
+    if (!attribute || !value) {
+      throw "Error [Event][AddAttribute]: 'name' and 'value' are required";
+    }
     this.customAttributes[attribute] = value;
     return this;
-  };
+  }
 
   /**
    *
    * Adds custom attributes to the event that are related to another entity
    * @param {string} attribute - Event's attribute name
-   * @param {string} referenceType - Related to entity name
+   * @param {string} referenceType - Related to entity type
    * @param {(string|number)} referenceId - Related to entity id
    * @returns the event instance
    */
-  addEntityReferencedAttribute = (attribute, referenceType, referenceId) => {
+  addEntityReferencedAttribute(attribute, referenceType, referenceId) {
+    if (!attribute || !referenceType || !referenceId) {
+      throw "Error [Event][AddEntityReferencedAttribute]: 'name', 'reference type' and 'reference id' are required";
+    }
     this.customAttributes[attribute] = { type: referenceType, id: referenceId };
     return this;
-  };
+  }
 
   /**
    *
@@ -214,10 +214,13 @@ class Event {
    * @param {(string|number)} impactedId - Entity Id that was impacted
    * @returns the event instance
    */
-  addImpactedTarget = (impactedType, impactedId) => {
+  addImpactedTarget(impactedType, impactedId) {
+    if (!impactedType || !impactedId) {
+      throw "Error [Event][AddImpactedTarget]: 'type' and 'id' are required";
+    }
     this.targets.push({ type: impactedType, id: impactedId });
     return this;
-  };
+  }
 }
 
 module.exports = {

@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const baseUrl = "https://api.trackzero.io/tracking";
+const baseUrl = "https://api.trackzero.io/log";
 
 const api = {
   /**
@@ -8,7 +8,7 @@ const api = {
    * @param {Event|Entity} body
    * @returns response
    */
-  post: async (endpointUrl, body) => {
+  post: async function (endpointUrl, body) {
     try {
       const response = await fetch(`${baseUrl}${endpointUrl}`, {
         method: "POST",
@@ -25,7 +25,7 @@ const api = {
         data = null;
       }
 
-      return new Response(response.status, response.statusText, data);
+      return new Response(response.status, data);
     } catch (err) {
       return new Response(null, null, null, err);
     }
@@ -33,14 +33,16 @@ const api = {
 };
 
 class Response {
-  constructor(status, statusText, data, error) {
+  constructor(status, data, error) {
     if (error) {
       this.error = `error: ${error}`;
     } else {
       this.status = status;
-      this.statusText = statusText;
       this.data = data;
-      this.error = status >= 400 ? statusText : null;
+      this.error =
+        status >= 400
+          ? `Check status ${status} on https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses`
+          : null;
     }
   }
 }
