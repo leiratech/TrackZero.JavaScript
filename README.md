@@ -1,6 +1,4 @@
-[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) [![#](https://img.shields.io/nuget/v/Leira.TrackZero.NetCore.svg)](https://www.nuget.org/packages/Leira.TrackZero.NetCore)
-
-![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
+[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) ![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
 
 <h1 align="center">
   <img alt="logo" src="./logo.svg" width="100"/>
