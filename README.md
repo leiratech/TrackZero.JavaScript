@@ -2,9 +2,8 @@
 
 ![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
 
+<p align="center"><img alt="logo" src="./logo.svg" width="100"/></p>
 <h1 align="center">
-  <img alt="logo" src="./logo.svg" width="100"/>
-  <br/>
   TrackZero-JS
 </h1>
 Powerful, insightful and real-time analytics that helps you take your products and apps to the next level.
@@ -21,7 +20,7 @@ npm install @leiratech/trackzero-js
 
 ### Import
 
-> Note: You can use either use `import` or `require`, both work fine
+> Note: You can either use `import` or `require`, both work fine
 
 ```js
 import { TrackZeroClient } from "@leiratech/trackzero-js";
@@ -59,6 +58,7 @@ import { Entity } from "@leiratech/trackzero-js";
 /**
  * @constructor
  * Initializes the Entity object
+ *
  * @param {string} type - states what the entity identifies as
  * @param {(string|number)} id - unique id associated with the entity
  */
@@ -70,6 +70,7 @@ let entity = new Entity("type", "id");
 ```js
 /**
  * Adds custom attributes to the entity
+ *
  * @param {string} attribute - property name
  * @param {*} value - property value
  * @returns the entity instance
@@ -82,6 +83,7 @@ entity.addAttribute("attribute", "value");
 ```js
 /**
  * Adds custom attributes to the entity that are related to another entity
+ *
  * @param {string} attribute - property name
  * @param {string} referenceType - the entity type it is referencing
  * @param {(string|number)} referenceId - the entity id it is referencing
@@ -99,6 +101,7 @@ entity.addEntityReferencedAttribute(
 ```js
 /**
  * Creates/Updates the Entity
+ *
  * @async
  * @param {Entity} entity
  * @returns the response status
@@ -119,6 +122,24 @@ let user = new Entity("User", "USER_ID")
 await instance.upsertEntity(user);
 ```
 
+#### Delete Entity
+
+> :warning: &nbsp; Deleting an entity will delete all events emitted by this entity.
+
+> :exclamation: &nbsp; Deletion is permanent and cannot be undone.
+
+```js
+/**
+ * Deletes the Entity
+ *
+ * @async
+ * @param {string} type - type of entity to be deleted
+ * @param {(string|number)} id - id of the entity to be deleted
+ * @returns the response status
+ */
+await instance.deleteEntity("type", "id");
+```
+
 ## Event
 
 Events are considered as actions that are emitted from an entity and impact another entity
@@ -133,18 +154,33 @@ import { Event } from "@leiratech/trackzero-js";
 /**
  * @constructor
  * Initializes the Event object
+ *
  * @param {string} emitterType - the entity type that emitted the event
  * @param {(string|number)} emitterId - the entity id that emitted the event
  * @param {string} name - the event name
+ * ------Optional Params------
+ * @param {(string|number)} [id] - the event id.
+ * @param {string} [startTime] - (ISO 8601) The start time of the event.
+ * @param {string} [endTime] - (ISO 8601) The end time of the event.
  */
-let event = new Event("emitterType", "emitterId", "name");
+let event = new Event(
+  "emitterType",
+  "emitterId",
+  "name",
+  "id",
+  "startTime",
+  "endTime"
+);
 ```
+
+> **Note:** Specifying your own event `id` prevents duplication if it happens and you send this event again. If not specified, it will be automatically set to a NewGuid.<br/>If `startTime` or `endTime` is not set, it will be automatically set to the current time UTC
 
 #### Add Attributes
 
 ```js
 /**
  * Adds custom attributes to the event
+ *
  * @param {string} attribute - property name
  * @param {*} value - property value
  * @returns the event instance
@@ -157,6 +193,7 @@ event.addAttribute("attribute", "value");
 ```js
 /**
  * Adds custom attributes to the event that are related to another entity
+ *
  * @param {string} attribute - property name
  * @param {string} referenceType - the entity type it is referencing
  * @param {(string|number)} referenceId - the entity id it is referencing
@@ -170,6 +207,7 @@ event.addEntityReferencedAttribute("attribute", "referenceType", "referenceId");
 ```js
 /**
  * Adds entities that were impacted by this event
+ *
  * @param {string} impactedType - the entity type that was impacted by the event
  * @param {(string|number)} impactedId - the entity id that was impacted by the event
  * @returns the event instance
@@ -182,6 +220,7 @@ event.addImpactedTarget("impactedType", "impactedId");
 ```js
 /**
  * Creates/Updates the Event
+ *
  * @async
  * @param {Event} event
  * @returns the response status
@@ -199,8 +238,24 @@ let checked = new Event("User", "USER_ID", "Checked Out")
   .addEntityReferencedAttribute("Item", "Product", "SKU-1234")
   .addImpactedTarget("Warehouse", "WH-BLVD-652");
 
-// Send the Event to TrackZero
 await instance.upsertEvent(checked);
+```
+
+#### Delete Event
+
+> :exclamation: &nbsp; Deletion is permanent and cannot be undone.
+
+```js
+/**
+ * Deletes the Event
+ *
+ * @async
+ * @param {string} type - event type/name to be deleted
+ * @param {(string|number)} id - id of the event to be deleted
+ *
+ * @returns the response status
+ */
+await instance.deleteEvent("type", "id");
 ```
 
 # Resources

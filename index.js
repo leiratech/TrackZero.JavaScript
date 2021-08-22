@@ -7,6 +7,7 @@ class TrackZeroClient {
   /**
    * @constructor
    * Initializes the singleton instance with the supplied API key
+   *
    * @param {string} apiKey
    * @returns a singleton instance of TrackZeroClient
    */
@@ -25,6 +26,7 @@ class TrackZeroClient {
   }
 
   /**
+   * Gets the singleton instance
    *
    * @static
    * @returns the instance of TrackZeroClient
@@ -37,8 +39,8 @@ class TrackZeroClient {
   }
 
   /**
-   *
    * Creates/Updates the Entity
+   *
    * @async
    * @param {Entity} entity
    * @returns the response status
@@ -57,8 +59,26 @@ class TrackZeroClient {
   }
 
   /**
+   * Deletes the Entity
    *
+   * @async
+   * @param {string} type - type of entity to be deleted
+   * @param {(string|number)} id - id of the entity to be deleted
+   * @returns the response status
+   */
+  async deleteEntity(type, id) {
+    if (!type || !id) {
+      throw "Error [Entity][deleteEntity]: 'type' and 'id' are required";
+    }
+
+    let body = { type, id };
+
+    return await api.delete(`/entities?X-API-KEY=${this.apiKey}`, body);
+  }
+
+  /**
    * Creates/Updates the Event
+   *
    * @async
    * @param {Event} event
    * @returns the response status
@@ -68,16 +88,38 @@ class TrackZeroClient {
       throw "Error [TrackZeroClient][upsertEvent]: parameter should be of type Event";
     }
     let body = {
+      id: event.id,
       emitter: {
         type: event.emitterType,
         id: event.emitterId,
       },
+      startTime: event.startTime,
+      endTime: event.endTime,
       name: event.name,
       CustomAttributes: event.customAttributes,
       Targets: event.targets,
     };
 
     return await api.post(`/events?X-API-KEY=${this.apiKey}`, body);
+  }
+
+  /**
+   * Deletes the Event
+   *
+   * @async
+   * @param {string} type - event type/name to be deleted
+   * @param {(string|number)} id - id of the event to be deleted
+   *
+   * @returns the response status
+   */
+  async deleteEvent(type, id) {
+    if (!type || !id) {
+      throw "Error [Entity][deleteEvent]: 'type' and 'id' are required";
+    }
+
+    let body = { type, id };
+
+    return await api.delete(`/events?X-API-KEY=${this.apiKey}`, body);
   }
 }
 
@@ -111,8 +153,8 @@ class Entity {
   }
 
   /**
-   *
    * Adds custom attributes to the entity
+   *
    * @param {string} attribute - Entity's attribute name
    * @param {*} value - Entity's attribute value
    * @returns the entity instance
@@ -126,8 +168,8 @@ class Entity {
   }
 
   /**
-   *
    * Adds custom attributes to the entity that are related to another entity
+   *
    * @param {string} attribute - Entity's attribute name
    * @param {string} referenceType - Related to entity type
    * @param {(string|number)} referenceId - Related to entity id
@@ -149,9 +191,13 @@ class Event {
   /**
    * @constructor
    * Initializes the Event object
-   * @param {string} emitterType - Type of the entity that emitted the event
-   * @param {(string|number)} emitterId - Id of the entity that emitted the event
-   * @param {string} name - Event's name
+   *
+   * @param {string} emitterType - Type of the entity that emitted the event.
+   * @param {(string|number)} emitterId - Id of the entity that emitted the event.
+   * @param {string} name - Event's name.
+   * @param {(string|number)} [id] - Event's id. Specifying your own Id prevents duplication if it happens and you send this event again. When not specified, it will be automatically set to a NewGuid.
+   * @param {string} [startTime] - (ISO 8601) The start time of the event. If not set, it will be automatically set to the current time UTC
+   * @param {string} [endTime] - (ISO 8601) The end time of the event. If not set, it will be automatically set to the current time UTC
    *
    * @example
    *
@@ -165,20 +211,23 @@ class Event {
    *  .addImpactedTarget("Company", "Store A")
    * ```
    */
-  constructor(emitterType, emitterId, name) {
+  constructor(emitterType, emitterId, name, id, startTime, endTime) {
     if (!emitterType || !emitterId || !name) {
       throw "Error [Event][Constructor]: 'emitter type', 'emitter id' and 'name' are required";
     }
     this.name = name;
     this.emitterType = emitterType;
     this.emitterId = emitterId;
+    this.id = id;
+    this.startTime = startTime;
+    this.endTime = endTime;
     this.targets = [];
     this.customAttributes = {};
   }
 
   /**
-   *
    * Adds custom attributes to the event
+   *
    * @param {string} attribute - Event's attribute name
    * @param {*} value - Event's attribute value
    * @returns the event instance
@@ -192,8 +241,8 @@ class Event {
   }
 
   /**
-   *
    * Adds custom attributes to the event that are related to another entity
+   *
    * @param {string} attribute - Event's attribute name
    * @param {string} referenceType - Related to entity type
    * @param {(string|number)} referenceId - Related to entity id
@@ -208,8 +257,8 @@ class Event {
   }
 
   /**
-   *
    * Adds entities that were impacted by this event
+   *
    * @param {string} impactedType - Entity type that was impacted
    * @param {(string|number)} impactedId - Entity Id that was impacted
    * @returns the event instance

@@ -2,6 +2,29 @@ const fetch = require("node-fetch");
 
 const baseUrl = "https://api.trackzero.io/log";
 
+const request = async function (endpointUrl, body, method) {
+  try {
+    const response = await fetch(`${baseUrl}${endpointUrl}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (error) {
+      data = null;
+    }
+
+    return new Response(response.status, data);
+  } catch (err) {
+    return new Response(null, null, err);
+  }
+};
+
 const api = {
   /**
    * @async
@@ -9,26 +32,10 @@ const api = {
    * @returns response
    */
   post: async function (endpointUrl, body) {
-    try {
-      const response = await fetch(`${baseUrl}${endpointUrl}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      let data = null;
-      try {
-        data = await response.json();
-      } catch (error) {
-        data = null;
-      }
-
-      return new Response(response.status, data);
-    } catch (err) {
-      return new Response(null, null, err);
-    }
+    return await request(endpointUrl, body, "POST");
+  },
+  delete: async function (endpointUrl, body) {
+    return await request(endpointUrl, body, "DELETE");
   },
 };
 
