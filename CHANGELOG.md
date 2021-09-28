@@ -1,5 +1,23 @@
 # Change Log
 
+## v1.3.0
+
+### Sep. 28, 2021
+
+#### Added
+
+- `queryConfiguration` Method
+
+## v1.2.0
+
+### Aug. 22, 2021
+
+#### Added
+
+- `deleteEvent` Method
+- `deleteEntity` Method
+- Optional Event Parameters `id`, `startTime`, `endTime`
+
 ## v1.1.0
 
 ### Aug. 19, 2021

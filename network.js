@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const baseUrl = "https://api.trackzero.io/log";
+const baseUrl = "https://api.trackzero.io";
 
 const request = async function (endpointUrl, body, method) {
   try {

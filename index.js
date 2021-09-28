@@ -1,5 +1,5 @@
 "use strict";
-const { api } = require("./network");
+const { logApi, configApi } = require("./endpoints");
 /**
  * @class
  */
@@ -55,7 +55,7 @@ class TrackZeroClient {
       customAttributes: entity.customAttributes,
     };
 
-    return await api.post(`/entities?X-API-KEY=${this.apiKey}`, body);
+    return await logApi.upsertEntity(this.apiKey, body);
   }
 
   /**
@@ -73,7 +73,7 @@ class TrackZeroClient {
 
     let body = { type, id };
 
-    return await api.delete(`/entities?X-API-KEY=${this.apiKey}`, body);
+    return await logApi.deleteEntity(this.apiKey, body);
   }
 
   /**
@@ -100,7 +100,7 @@ class TrackZeroClient {
       Targets: event.targets,
     };
 
-    return await api.post(`/events?X-API-KEY=${this.apiKey}`, body);
+    return await logApi.upsertEvent(this.apiKey, body);
   }
 
   /**
@@ -119,7 +119,24 @@ class TrackZeroClient {
 
     let body = { type, id };
 
-    return await api.delete(`/events?X-API-KEY=${this.apiKey}`, body);
+    return await logApi.deleteEvent(this.apiKey, body);
+  }
+
+  /**
+   * Queries the configuration based on the groupId
+   *
+   * @async
+   * @param {string} groupId - the configuration group Id
+   * @param {(string|number)} identifier - the value you want to check the conditions on
+   * @returns the response status
+   */
+  async queryConfiguration(groupId, identifier) {
+    if (!groupId) {
+      throw "Error [TrackZeroClient][queryConfiguration]: 'groupId' is required";
+    }
+    let body = { identifier: identifier };
+
+    return await configApi.query(this.apiKey, groupId, body);
   }
 }
 

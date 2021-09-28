@@ -1,4 +1,6 @@
-[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) ![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
+[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) [![#](https://img.shields.io/nuget/v/Leira.TrackZero.NetCore.svg)](https://www.nuget.org/packages/Leira.TrackZero.NetCore)
+
+![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
 
 <p align="center"><img alt="logo" src="./logo.svg" width="100"/></p>
 <h1 align="center">
@@ -171,7 +173,9 @@ let event = new Event(
 );
 ```
 
-> **Note:** Specifying your own event `id` prevents duplication if it happens and you send this event again. If not specified, it will be automatically set to a NewGuid.<br/>If `startTime` or `endTime` is not set, it will be automatically set to the current time UTC
+> **Note:** `startTime` and `endTime` are important, always try to set them. If both are not supplied, both will be set to the current time. If one is not supplied, it will be set to be equal to the other.
+
+> **Note:** The `id` of the event is important if you plan on changing or adding more information to the event later. You will need the `id` to make those changes.
 
 #### Add Attributes
 
@@ -254,6 +258,22 @@ await instance.upsertEvent(checked);
  * @returns the response status
  */
 await instance.deleteEvent("type", "id");
+```
+
+## Smart Configuration
+
+Customizable configurations based on certain conditions checked across a selection of your saved reports on the portal
+
+```js
+/**
+ * Queries the configuration based on the groupId
+ *
+ * @async
+ * @param {string} groupId - the configuration group Id (Portal > Smart Configuration Page)
+ * @param {(string|number)} identifier - the value you want to check the conditions on
+ * @returns the response status
+ */
+await instance.queryConfiguration("groupId", "identifier");
 ```
 
 # Resources
