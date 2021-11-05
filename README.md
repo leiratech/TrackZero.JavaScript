@@ -1,4 +1,4 @@
-[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) [![#](https://img.shields.io/nuget/v/Leira.TrackZero.NetCore.svg)](https://www.nuget.org/packages/Leira.TrackZero.NetCore)
+[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) [![#](https://img.shields.io/pub/v/leiratech_trackzero)](https://pub.dev/packages/leiratech_trackzero) [![#](https://img.shields.io/nuget/v/Leira.TrackZero.NetCore.svg)](https://www.nuget.org/packages/Leira.TrackZero.NetCore)
 
 ![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
 
@@ -124,8 +124,6 @@ await instance.upsertEntity(user);
 
 #### Delete Entity
 
-> :warning: &nbsp; Deleting an entity will delete all events emitted by this entity.
-
 > :exclamation: &nbsp; Deletion is permanent and cannot be undone.
 
 ```js
@@ -140,140 +138,24 @@ await instance.upsertEntity(user);
 await instance.deleteEntity("type", "id");
 ```
 
-## Event
+## Analytics Spaces
 
-Events are considered as actions that are emitted from an entity and impact another entity
+Each analytics space represents a separate database storing analytical data relevant to a specific subject/entity _user defined_.
 
-```js
-import { Event } from "@leiratech/trackzero-js";
-```
+Each analytics space is able to build reports and dahsboards in TrackZero's space portal.
 
-#### Create an Event object
+#### Get a Space Portal Session
 
 ```js
 /**
- * @constructor
- * Initializes the Event object
- *
- * @param {string} emitterType - the entity type that emitted the event
- * @param {(string|number)} emitterId - the entity id that emitted the event
- * @param {string} name - the event name
- * ------Optional Params------
- * @param {(string|number)} [id] - the event id.
- * @param {string} [startTime] - (ISO 8601) The start time of the event.
- * @param {string} [endTime] - (ISO 8601) The end time of the event.
- */
-let event = new Event(
-  "emitterType",
-  "emitterId",
-  "name",
-  "id",
-  "startTime",
-  "endTime"
-);
-```
-
-> **Note:** `startTime` and `endTime` are important, always try to set them. If both are not supplied, both will be set to the current time. If one is not supplied, it will be set to be equal to the other.
-
-> **Note:** The `id` of the event is important if you plan on changing or adding more information to the event later. You will need the `id` to make those changes.
-
-#### Add Attributes
-
-```js
-/**
- * Adds custom attributes to the event
- *
- * @param {string} attribute - property name
- * @param {*} value - property value
- * @returns the event instance
- */
-event.addAttribute("attribute", "value");
-```
-
-#### Add Attributes Referencing Other Entities
-
-```js
-/**
- * Adds custom attributes to the event that are related to another entity
- *
- * @param {string} attribute - property name
- * @param {string} referenceType - the entity type it is referencing
- * @param {(string|number)} referenceId - the entity id it is referencing
- * @returns the event instance
- */
-event.addEntityReferencedAttribute("attribute", "referenceType", "referenceId");
-```
-
-#### Add Impacted Entities
-
-```js
-/**
- * Adds entities that were impacted by this event
- *
- * @param {string} impactedType - the entity type that was impacted by the event
- * @param {(string|number)} impactedId - the entity id that was impacted by the event
- * @returns the event instance
- */
-event.addImpactedTarget("impactedType", "impactedId");
-```
-
-#### Track Event
-
-```js
-/**
- * Creates/Updates the Event
+ * Creates a portal session
  *
  * @async
- * @param {Event} event
+ * @param {number} analyticsSpaceId - the analytics space id
+ * @param {number} [ttl=3600] - (in seconds) time to live, when the session expires
  * @returns the response status
  */
-await instance.upsertEvent(event);
-```
-
-> **Note:** Like the Entity object, upsert _(Update/Insert)_ is applied to the event's emitter, entity's referenced attributes in `addEntityReferencedAttribute`, and the impacted entities in `addImpactedTarget`.
-
-#### Complete Event Example
-
-```js
-let checked = new Event("User", "USER_ID", "Checked Out")
-  .addAttribute("Cart Total", 99.95)
-  .addEntityReferencedAttribute("Item", "Product", "SKU-1234")
-  .addImpactedTarget("Warehouse", "WH-BLVD-652");
-
-await instance.upsertEvent(checked);
-```
-
-#### Delete Event
-
-> :exclamation: &nbsp; Deletion is permanent and cannot be undone.
-
-```js
-/**
- * Deletes the Event
- *
- * @async
- * @param {string} type - event type/name to be deleted
- * @param {(string|number)} id - id of the event to be deleted
- *
- * @returns the response status
- */
-await instance.deleteEvent("type", "id");
-```
-
-## Smart Configuration
-
-Customizable configurations based on certain conditions checked across a selection of your saved reports on the portal
-
-```js
-/**
- * Queries the configuration based on the groupId
- *
- * @async
- * @param {string} groupId - the configuration group Id (Portal > Smart Configuration Page)
- * @param {(string|number)} identifier - the value you want to check the conditions on
- * @returns the response status
- */
-await instance.queryConfiguration("groupId", "identifier");
+await instance.getSession(analyticsSpaceId, ttl);
 ```
 
 # Resources

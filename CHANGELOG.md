@@ -1,5 +1,20 @@
 # Change Log
 
+## v1.4.0
+
+### Nov. 04, 2021
+
+- Pivot Point: Introducing TrackZero's Analytics Space Portal
+
+#### Added
+
+- Creating a session to connect to an analytical space
+
+#### Removed
+
+- `Event`
+- `Smart Configuration`
+
 ## v1.3.0
 
 ### Sep. 28, 2021

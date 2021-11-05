@@ -1,6 +1,6 @@
 {
   "name": "@leiratech/trackzero-js",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "TrackZero is a full analytics platform that allows you to track what is happening in your system in real time.",
   "main": "index.js",
   "scripts": {

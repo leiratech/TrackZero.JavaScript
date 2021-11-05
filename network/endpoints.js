@@ -1,7 +1,7 @@
 const { api } = require("./network");
 
 const log = "/log";
-const config = "/dynamicconfiguration";
+const spaces = "/AnalyticsSpaces";
 
 const logApi = {
   upsertEntity: async function (apiKey, body) {
@@ -18,13 +18,15 @@ const logApi = {
   },
 };
 
-const configApi = {
-  query: async function (apiKey, groupId, body) {
-    return await api.post(
-      `${config}/applicable?X-API-KEY=${apiKey}&configurationGroupId=${groupId}`,
-      body
+const spaceApi = {
+  getSession: async function (apiKey, analyticsSpaceId, ttl) {
+    return await api.get(
+      `${spaces}/session?analyticsSpaceId=${analyticsSpaceId}&ttl=${ttl}`,
+      {
+        "X-API-KEY": apiKey,
+      }
     );
   },
 };
 
-module.exports = { logApi, configApi };
+module.exports = { logApi, spaceApi };
