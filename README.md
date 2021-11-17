@@ -1,4 +1,4 @@
-[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) [![#](https://img.shields.io/pub/v/leiratech_trackzero)](https://pub.dev/packages/leiratech_trackzero) [![#](https://img.shields.io/nuget/v/Leira.TrackZero.NetCore.svg)](https://www.nuget.org/packages/Leira.TrackZero.NetCore)
+[![#](https://img.shields.io/npm/v/@leiratech/trackzero-js)](https://www.npmjs.com/package/@leiratech/trackzero-js) [![#](https://img.shields.io/nuget/v/Leira.TrackZero.NetCore.svg)](https://www.nuget.org/packages/Leira.TrackZero.NetCore)
 
 ![#](https://img.shields.io/npm/l/@leiratech/trackzero-js)
 
@@ -44,9 +44,25 @@ After initializing the TrackZero instance, you could get the instance anywhere i
 let instance = TrackZeroClient.getInstance();
 ```
 
+## Analytics Spaces
+
+The first you need to do before sending data to TrackZero is to create your data container (Analytics Space), please make sure to read the [Concepts & Definitions](https://www.trackzero.io/docs/concepts-definitions/) to fully understand how TrackZero works.
+
+#### Creating Analytics Spaces
+
+```js
+await instance.createAnalyticsSpaceAsync("analytics-space-id");
+```
+
+#### Deleting Analytics Spaces
+
+```js
+await instance.deleteAnalyticsSpaceAsync("analytics-space-id");
+```
+
 ## Entity
 
-Entities are objects that contain data. It can represent any object in the real world. Each entity is defined by it’s Type and Id.
+TrackZero uses what is known as Upsert (Update or Insert). Creating an Entity or updating it uses the same operation. This allows undeterministic creation of Entities (Or updating), which means you don’t have to remember the state of an Entity in order to determine whether you need to update or create.
 
 ```js
 import { Entity } from "@leiratech/trackzero-js";
@@ -59,8 +75,8 @@ import { Entity } from "@leiratech/trackzero-js";
  * @constructor
  * Initializes the Entity object
  *
- * @param {string} type - states what the entity identifies as
- * @param {(string|number)} id - unique id associated with the entity
+ * @param {string} type
+ * @param {(string|number)} identity
  */
 let entity = new Entity("type", "id");
 ```
@@ -71,8 +87,8 @@ let entity = new Entity("type", "id");
 /**
  * Adds custom attributes to the entity
  *
- * @param {string} attribute - property name
- * @param {*} value - property value
+ * @param {string} attribute
+ * @param {*} value
  * @returns the entity instance
  */
 entity.addAttribute("attribute", "value");
@@ -82,11 +98,11 @@ entity.addAttribute("attribute", "value");
 
 ```js
 /**
- * Adds custom attributes to the entity that are related to another entity
+ * Adding Reference Attributes that will link to other entities
  *
- * @param {string} attribute - property name
- * @param {string} referenceType - the entity type it is referencing
- * @param {(string|number)} referenceId - the entity id it is referencing
+ * @param {string} attribute
+ * @param {string} referenceTypereferencing
+ * @param {(string|number)} referenceId
  * @returns the entity instance
  */
 entity.addEntityReferencedAttribute(
@@ -104,9 +120,10 @@ entity.addEntityReferencedAttribute(
  *
  * @async
  * @param {Entity} entity
+ * @param {string} analyticsSpaceId
  * @returns the response status
  */
-await instance.upsertEntity(entity);
+await instance.upsertEntityAsync(entity, "analytics-space-id");
 ```
 
 > **Note:** Upsert _(Update/Insert)_ is applied when sending the entity. So, if the the entity of type X with id Y already exists, then it gets updated, else a new entity is created. This also applies to the entity's referenced attributes in `addEntityReferencedAttribute`.
@@ -119,7 +136,7 @@ let user = new Entity("User", "USER_ID")
   .addAttribute("Date Of Birth", new Date(Date.UTC(1990, 11, 23))) //Make sure dates are in UTC
   .addEntityReferencedAttribute("Location", "Country", "US");
 
-await instance.upsertEntity(user);
+await instance.upsertEntityAsync(user, "analytics-space-id");
 ```
 
 #### Delete Entity
@@ -131,32 +148,36 @@ await instance.upsertEntity(user);
  * Deletes the Entity
  *
  * @async
- * @param {string} type - type of entity to be deleted
- * @param {(string|number)} id - id of the entity to be deleted
+ * @param {string} type
+ * @param {(string|number)} id
+ * @param {string} analyticsSpaceId
  * @returns the response status
  */
-await instance.deleteEntity("type", "id");
+await instance.deleteEntityAsync("type", "id", "analytics-space-id");
 ```
 
 ## Analytics Spaces
 
-Each analytics space represents a separate database storing analytical data relevant to a specific subject/entity _user defined_.
+You can easily create the analytics space session. The result from the server will contain one attribute that we are interested in which is the Url. Once you have the Url, send the user to that Url provided by TrackZero and they can start using the platform.
 
-Each analytics space is able to build reports and dahsboards in TrackZero's space portal.
-
-#### Get a Space Portal Session
+#### Get an Analytics Space Portal Session
 
 ```js
 /**
- * Creates a portal session
+ * Creates an analytics portal session
  *
  * @async
- * @param {number} analyticsSpaceId - the analytics space id
- * @param {number} [ttl=3600] - (in seconds) time to live, when the session expires
- * @returns the response status
+ * @param {number} analyticsSpaceId
+ * @param {number} ttl
+ * @returns the portal session
  */
-await instance.getSession(analyticsSpaceId, ttl);
+let session = await instance.createAnalyticsSpacePortalSessionAsync(
+  "analytics-space-id",
+  3600
+);
 ```
+
+> Sessions automatically expire and get removed. No action is necessary from your side.
 
 # Resources
 

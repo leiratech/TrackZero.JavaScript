@@ -6,8 +6,8 @@ class Entity {
   /**
    * @constructor
    * Initializes the Entity object
-   * @param {string} type - Entity's type
-   * @param {(string|number)} id - Entity's id
+   * @param {string} type - The type of the Entity you are trying to send.
+   * @param {(string|number)} id - The id of the Entity you are trying to upsert.
    *
    * @example
    *
@@ -37,7 +37,10 @@ class Entity {
    */
   addAttribute(attribute, value) {
     if (!attribute || !value) {
-      throw "Error [Entity][AddAttribute]: 'name' and 'value' are required";
+      throw "Error [Entity][AddAttribute]: 'attribute' and 'value' are required";
+    }
+    if (attribute.startsWith("_")) {
+      throw "Error [Entity][AddAttribute]: 'attribute' cannot start with '_'";
     }
     this.customAttributes[attribute] = value;
     return this;
@@ -55,7 +58,19 @@ class Entity {
     if (!attribute || !referenceType || !referenceId) {
       throw "Error [Entity][AddEntityReferencedAttribute]: 'name', 'reference type' and 'reference id' are required";
     }
-    this.customAttributes[attribute] = { type: referenceType, id: referenceId };
+    if (attribute.startsWith("_")) {
+      throw "Error [Entity][AddEntityReferencedAttribute]: 'attribute' cannot start with '_'";
+    }
+    if (this.customAttributes[attribute]) {
+      this.customAttributes[attribute].push({
+        type: referenceType,
+        id: referenceId,
+      });
+    } else {
+      this.customAttributes[attribute] = [
+        { type: referenceType, id: referenceId },
+      ];
+    }
     return this;
   }
 }

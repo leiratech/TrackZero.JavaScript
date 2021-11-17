@@ -4,28 +4,40 @@ const log = "/log";
 const spaces = "/AnalyticsSpaces";
 
 const logApi = {
-  upsertEntity: async function (apiKey, body) {
-    return await api.post(`${log}/entities?X-API-KEY=${apiKey}`, body);
+  upsertEntity: async function (body, analyticsSpaceId) {
+    const response = await api
+      .post(`${log}/entities?analyticsSpaceId=${analyticsSpaceId}`, body)
+      .catch((err) => console.log(`Error: ${err}`));
+    return response;
   },
-  deleteEntity: async function (apiKey, body) {
-    return await api.delete(`${log}/entities?X-API-KEY=${apiKey}`, body);
-  },
-  upsertEvent: async function (apiKey, body) {
-    return await api.post(`${log}/events?X-API-KEY=${apiKey}`, body);
-  },
-  deleteEvent: async function (apiKey, body) {
-    return await api.delete(`${log}/events?X-API-KEY=${apiKey}`, body);
+  deleteEntity: async function (body, analyticsSpaceId) {
+    const response = await api
+      .delete(`${log}/entities?analyticsSpaceId=${analyticsSpaceId}`, {
+        data: body,
+      })
+      .catch((err) => console.log(`Error: ${err}`));
+    return response;
   },
 };
 
 const spaceApi = {
-  getSession: async function (apiKey, analyticsSpaceId, ttl) {
-    return await api.get(
-      `${spaces}/session?analyticsSpaceId=${analyticsSpaceId}&ttl=${ttl}`,
-      {
-        "X-API-KEY": apiKey,
-      }
-    );
+  createSpace: async function (analyticsSpaceId) {
+    const response = await api
+      .post(`${spaces}?analyticsSpaceId=${analyticsSpaceId}`)
+      .catch((err) => console.log(`Error: ${err}`));
+    return response;
+  },
+  deleteSpace: async function (analyticsSpaceId) {
+    const response = await api
+      .delete(`${spaces}?analyticsSpaceId=${analyticsSpaceId}`)
+      .catch((err) => console.log(`Error: ${err}`));
+    return response;
+  },
+  getSession: async function (analyticsSpaceId, ttl) {
+    const response = await api
+      .get(`${spaces}/session?analyticsSpaceId=${analyticsSpaceId}&ttl=${ttl}`)
+      .catch((err) => console.log(`Error: ${err}`));
+    return response;
   },
 };
 
