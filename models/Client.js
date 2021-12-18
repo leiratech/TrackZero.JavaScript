@@ -89,6 +89,7 @@ class TrackZeroClient {
       type: entity.type,
       id: entity.id,
       customAttributes: entity.customAttributes,
+      autoGeography: entity.autoGeography,
     };
 
     return await logApi.upsertEntity(body, analyticsSpaceId);

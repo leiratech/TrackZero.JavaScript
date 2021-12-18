@@ -26,6 +26,7 @@ class Entity {
     this.type = type;
     this.id = id;
     this.customAttributes = {};
+    this.autoGeography = null;
   }
 
   /**
@@ -71,6 +72,29 @@ class Entity {
         { type: referenceType, id: referenceId },
       ];
     }
+    return this;
+  }
+
+  /**
+   * Automatically Translates a GeoPoint (Lat, Long) to Country and State and links them as Referenced Entity.
+   *
+   * @param {number} latitude
+   * @param {number} longitude
+   * @returns the entity instance
+   */
+  addAutomaticallyTranslatedGeoPoint(latitude, longitude) {
+    if (!latitude || !longitude) {
+      throw "Error [Entity][AddAutomaticallyTranslatedGeoPoint]: 'latitude' and 'longitude' are required";
+    }
+    if (isNaN(latitude) || isNaN(longitude)) {
+      throw "Error [Entity][AddAutomaticallyTranslatedGeoPoint]: 'latitude' and 'longitude' should be numbers";
+    }
+    this.autoGeography = {
+      geoPoint: {
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+      },
+    };
     return this;
   }
 }

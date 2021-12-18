@@ -1,5 +1,15 @@
 # Change Log
 
+## v2.1.0
+
+### Dec. 18, 2021
+
+#### Added
+
+- `addAutomaticallyTranslatedGeoPoint` method in `Entity` class to translate a geoPoint
+
+---
+
 ## v2.0.0
 
 ### Nov. 17, 2021

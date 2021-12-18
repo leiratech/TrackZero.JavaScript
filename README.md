@@ -112,6 +112,22 @@ entity.addEntityReferencedAttribute(
 );
 ```
 
+#### Attach a geopoint to an entity to analyse it on a map
+
+```js
+/**
+ * Automatically Translates a GeoPoint (Lat, Long) to Country and State and links them as Referenced Entity.
+ *
+ * @param {number} latitude
+ * @param {number} longitude
+ * @returns the entity instance
+ */
+entity.addAutomaticallyTranslatedGeoPoint(
+  41.037086118695825,
+  28.98489855136287
+);
+```
+
 #### Track Entity
 
 ```js
@@ -134,7 +150,8 @@ await instance.upsertEntityAsync(entity, "analytics-space-id");
 let user = new Entity("User", "USER_ID")
   .addAttribute("Name", "Sam Smith")
   .addAttribute("Date Of Birth", new Date(Date.UTC(1990, 11, 23))) //Make sure dates are in UTC
-  .addEntityReferencedAttribute("Location", "Country", "US");
+  .addEntityReferencedAttribute("Location", "Country", "US")
+  .addAutomaticallyTranslatedGeoPoint(41.037086118695825, 28.98489855136287);
 
 await instance.upsertEntityAsync(user, "analytics-space-id");
 ```
@@ -158,9 +175,12 @@ await instance.deleteEntityAsync("type", "id", "analytics-space-id");
 
 ## Analytics Spaces
 
-You can easily create the analytics space session. The result from the server will contain one attribute that we are interested in which is the Url. Once you have the Url, send the user to that Url provided by TrackZero and they can start using the platform.
+When your user wants to access their data in order to run reports or view dashboards, you will have to create an Analytics Space Session.
+These sessions are short lived and scoped sessions. Simply create an Analytics Space session and forward the user to the URL in the response.
 
 #### Get an Analytics Space Portal Session
+
+You can easily create the analytics space session. The result from the server will contain one attribute that we are interested in which is the Url. Once you have the Url, send the user to that Url provided by TrackZero and they can start using the platform.
 
 ```js
 /**
@@ -168,7 +188,7 @@ You can easily create the analytics space session. The result from the server wi
  *
  * @async
  * @param {number} analyticsSpaceId
- * @param {number} ttl
+ * @param {number} [ttl]
  * @returns the portal session
  */
 let session = await instance.createAnalyticsSpacePortalSessionAsync(

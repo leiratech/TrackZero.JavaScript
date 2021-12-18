@@ -1,6 +1,6 @@
 {
   "name": "@leiratech/trackzero-js",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Powerful, insightful and real-time BI & forecasting using ML that helps your customers grow on your platform.",
   "main": "index.js",
   "scripts": {
